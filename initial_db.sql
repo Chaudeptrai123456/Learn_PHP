@@ -45,7 +45,7 @@ CREATE TABLE product_skus (
     stock_qty INT DEFAULT 0,
     sold_qty INT DEFAULT 0,
     image_url VARCHAR(500),
-    is_default TINYINT(1) DEFAULT 0, -- Hiện phiên bản này làm mặc định
+    is_default TINYINT(1) DEFAULT 0, 
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
     INDEX idx_sku_price (price)
 ) ENGINE=InnoDB;
@@ -56,7 +56,7 @@ CREATE TABLE vouchers (
     discount_type ENUM('fixed', 'percent') NOT NULL,
     discount_value DECIMAL(15, 2) NOT NULL,
     min_order_value DECIMAL(15, 2) DEFAULT 0,
-    max_discount_value DECIMAL(15, 2) DEFAULT NULL, -- Giới hạn nếu là %
+    max_discount_value DECIMAL(15, 2) DEFAULT NULL, 
     start_date DATETIME,
     end_date DATETIME,
     usage_limit INT DEFAULT 100,

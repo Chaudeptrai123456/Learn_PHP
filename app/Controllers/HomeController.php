@@ -18,4 +18,8 @@ class HomeController extends Controller {
     public function baohanh(){
         return $this->view('public/pages/baohanh');
     }
-}
+    public function notfound(){
+        return $this->view('public/pages/404');
+        
+    }
+    }

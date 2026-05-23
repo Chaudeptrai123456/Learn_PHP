@@ -41,7 +41,8 @@ abstract class Controller {
         }
 
         http_response_code(404);
-        echo "404 Not Found";
+        header("Location: /assignment/404");
+        exit;
     }
     protected function view(string $view, array $data = []): void {
         $viewFile = __DIR__ . "/../../views/$view.php";
