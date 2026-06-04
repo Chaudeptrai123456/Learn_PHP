@@ -3,10 +3,10 @@ namespace App\Core;
 
 class Config {
     const DB_HOST = '127.0.0.1'; 
-    const DB_PORT = '3307';
+    const DB_PORT = '3306';
     const DB_NAME = 'ecommerce';
-    const DB_USER = 'master';
-    const DB_PASS = 'chaudeptraivcl';
+    const DB_USER = 'root';
+    const DB_PASS = '';
     const DB_CHARSET = 'utf8mb4';
 
     const APP_NAME = 'TechStore Luxury';
@@ -18,7 +18,6 @@ class Config {
         $scriptName = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']));
         $publicPath = rtrim($scriptName, '/public');
         $baseUrl = $protocol . "://" . $host . $publicPath;
-
         return rtrim($baseUrl, '/');
     }
 

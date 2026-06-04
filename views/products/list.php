@@ -1,10 +1,22 @@
 <?php
-$slides = [
-    ['img' => 'https://www.apple.com/v/iphone-15-pro/c/images/overview/welcome/hero__f19ebubotv6u_large.jpg', 'title' => 'iPhone 15 Pro', 'sub' => 'Titanium mạnh mẽ.'],
-    ['img' => 'https://www.apple.com/v/macbook-pro/ak/images/overview/hero/hero_main__cl6bh9at6m6u_large.jpg', 'title' => 'MacBook Pro M3', 'sub' => 'Đỉnh cao đồ họa.']
-];
-function formatVND($n) { 
-    return number_format($n, 0, ',', '.') . ' ₫'; 
+if (!function_exists('formatVND')) {
+    function formatVND($n) { 
+        return number_format($n, 0, ',', '.') . ' ₫'; 
+    }
+}
+function parseCategorySlug($category_name) {
+    switch (mb_strtolower(trim($category_name))) {
+        case 'điện thoại':
+            return 'dien-thoai';
+        case 'laptop':
+            return 'laptop';
+        case 'tablet':
+            return 'tablet';
+        case 'phụ kiện':
+            return 'phu-kien';
+        default:
+            return 'other';
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -18,50 +30,6 @@ function formatVND($n) {
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-    .btn-add {
-        display: inline-block;
-        padding: 10px 16px;
-        background: #0071e3;
-        color: #fff;
-        text-decoration: none;
-        border-radius: 6px;
-    }
-
-    .hero-section {
-        position: relative;
-        overflow: hidden;
-    }
-
-    .slide {
-        display: none;
-        position: relative;
-    }
-
-    .slide.active {
-        display: block;
-    }
-
-    .hero-btn {
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        background: rgba(0, 0, 0, 0.5);
-        color: #fff;
-        border: none;
-        padding: 12px 16px;
-        cursor: pointer;
-        font-size: 20px;
-        border-radius: 50%;
-    }
-
-    .hero-btn.prev {
-        left: 20px;
-    }
-
-    .hero-btn.next {
-        right: 20px;
-    }
-
     :root {
         --primary: #0071e3;
         --black: #000000;
@@ -159,11 +127,13 @@ function formatVND($n) {
     .cart-icon {
         position: relative;
         cursor: pointer;
+        color: var(--dark);
+        text-decoration: none;
     }
 
     .cart-badge {
         position: absolute;
-        left: -10px;
+        top: -8px;
         right: -10px;
         background: var(--primary);
         color: #fff;
@@ -197,13 +167,14 @@ function formatVND($n) {
 
     .slide.active {
         opacity: 1;
+        z-index: 1;
     }
 
     .slide img {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        opacity: 0.7;
+        opacity: 0.5;
     }
 
     .slide-content {
@@ -227,6 +198,40 @@ function formatVND($n) {
         border-radius: 30px;
         text-decoration: none;
         font-weight: 700;
+        display: inline-block;
+        transition: var(--transition);
+    }
+
+    .btn-white:hover {
+        background: var(--primary);
+        color: #fff;
+    }
+
+    .hero-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(0, 0, 0, 0.5);
+        color: #fff;
+        border: none;
+        padding: 12px 16px;
+        cursor: pointer;
+        font-size: 20px;
+        border-radius: 50%;
+        z-index: 10;
+        transition: var(--transition);
+    }
+
+    .hero-btn:hover {
+        background: var(--primary);
+    }
+
+    .hero-btn.prev {
+        left: 20px;
+    }
+
+    .hero-btn.next {
+        right: 20px;
     }
 
     /* --- FILTER BAR --- */
@@ -250,6 +255,7 @@ function formatVND($n) {
     .category-tabs {
         display: flex;
         gap: 10px;
+        flex-wrap: wrap;
     }
 
     .tab {
@@ -316,12 +322,19 @@ function formatVND($n) {
         position: absolute;
         top: 15px;
         left: 15px;
-        background: #000;
+        background: #d93838;
         color: #fff;
-        font-size: 10px;
+        font-size: 11px;
         padding: 4px 10px;
         border-radius: 5px;
         font-weight: 700;
+        z-index: 2;
+    }
+
+    .p-info {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
     }
 
     .p-name {
@@ -350,29 +363,14 @@ function formatVND($n) {
         font-size: 0.85rem;
     }
 
-    .p-sold-wrap {
+    .p-stats-wrap {
         margin-bottom: 15px;
-    }
-
-    .p-sold-info {
+        margin-top: auto;
+        font-size: 0.8rem;
+        color: #666;
         display: flex;
         justify-content: space-between;
-        font-size: 0.75rem;
-        font-weight: 700;
-        margin-bottom: 5px;
-    }
-
-    .p-bar {
-        height: 6px;
-        background: #f0f0f0;
-        border-radius: 10px;
-        overflow: hidden;
-    }
-
-    .p-bar-fill {
-        height: 100%;
-        background: linear-gradient(90deg, var(--primary), #5ac8fa);
-        border-radius: 10px;
+        align-items: center;
     }
 
     .btn-add {
@@ -385,6 +383,9 @@ function formatVND($n) {
         font-weight: 700;
         cursor: pointer;
         transition: 0.3s;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
     }
 
     .btn-add:hover {
@@ -474,155 +475,189 @@ function formatVND($n) {
 </head>
 
 <body>
-
-    <section class="hero-section">
-        <?php foreach(array_slice($products, 0, 2) as $i => $p): ?>
+    < section class="hero-section">
+        <?php if (!empty($products)): ?>
+        <?php foreach(array_slice($products, 0, 2) as $i => $p): 
+                // Tạo ảnh mẫu động theo tên sản phẩm để tránh lỗi hiển thị do thiếu cột ảnh
+                $placeholder_img = "https://placehold.co/1200x600/1d1d1f/ffffff?text=" . urlencode($p['name']);
+            ?>
         <div class="slide <?php echo $i == 0 ? 'active' : ''; ?>">
-            <img src="<?php echo $p['image']; ?>" alt="<?php echo $p['name']; ?>">
+            <img src="<?php echo $placeholder_img; ?>" alt="<?php echo htmlspecialchars($p['name']); ?>">
             <div class="slide-content">
-                <h1><?php echo $p['name']; ?></h1>
-                <p><?php echo $p['short_desc']; ?></p><br>
+                <h1><?php echo htmlspecialchars($p['name']); ?></h1>
+                <p><?php echo htmlspecialchars($p['short_description']); ?></p><br>
                 <a href="/assignment/product/<?php echo $p['slug']; ?>" class="btn-white">
                     Mua ngay
                 </a>
             </div>
         </div>
         <?php endforeach; ?>
+        <?php endif; ?>
         <button class="hero-btn prev">❮</button>
         <button class="hero-btn next">❯</button>
-    </section>
-    <div class="filter-bar">
-        <div class="container filter-flex">
-            <div class="category-tabs">
-                <div class="tab active" onclick="filterCat('all', this)">Tất cả</div>
-                <div class="tab" onclick="filterCat('phone', this)">iPhone</div>
-                <div class="tab" onclick="filterCat('laptop', this)">MacBook</div>
-                <div class="tab" onclick="filterCat('watch', this)">Watch</div>
-                <div class="tab" onclick="filterCat('audio', this)">Âm thanh</div>
-            </div>
-            <div class="sort-options">
-                <select id="sortPrice" onchange="sortProducts()">
-                    <option value="default">Sắp xếp theo</option>
-                    <option value="low">Giá thấp đến cao</option>
-                    <option value="high">Giá cao đến thấp</option>
-                </select>
-            </div>
-        </div>
-    </div>
-    <main class="container products-section" id="products">
-        <div class="p-grid" id="productGrid">
-            <?php foreach($products as $p): 
-            $percent = ($p['sold'] / $p['stock']) * 100;
-        ?>
-            <div class="p-card" data-cat="<?php echo $p['cat']; ?>" data-price="<?php echo $p['price']; ?>"
-                data-name="<?php echo strtolower($p['name']); ?>">
-                <span class="p-badge"><?php echo $p['badge']; ?></span>
-                <img src="<?php echo $p['image']; ?>" alt="Product" class="p-img">
-                <div class="p-info">
-                    <div style="color:#ffcc00; font-size:0.7rem; margin-bottom:5px;">
-                        <?php echo str_repeat('<i class="fas fa-star"></i>', $p['rating']); ?>
+        </section>
+
+        <!-- FILTER BAR -->
+        <div class="filter-bar">
+            <div class="container filter-flex">
+                <div class="category-tabs">
+                    <div class="tab active" onclick="filterCat('all', this)">Tất cả</div>
+                    <?php if (!empty($categories) && is_array($categories)): ?>
+                    <?php foreach ($categories as $category): ?>
+                    <div class="tab" onclick="filterCat('<?php echo htmlspecialchars($category['slug']); ?>', this)">
+                        <?php echo htmlspecialchars($category['name']); ?>
                     </div>
-                    <h3 class="p-name"><?php echo $p['name']; ?></h3>
-                    <div class="p-price-row">
-                        <span class="p-new"><?php echo formatVND($p['price']); ?></span>
-                        <span class="p-old"><?php echo formatVND($p['old_price']); ?></span>
-                    </div>
-                    <div class="p-sold-wrap">
-                        <div class="p-sold-info">
-                            <span>Đã bán <?php echo $p['sold']; ?></span>
-                            <span style="color:var(--primary)">Hot</span>
-                        </div>
-                        <div class="p-bar">
-                            <div class="p-bar-fill" style="width:<?php echo $percent; ?>%"></div>
-                        </div>
-                    </div>
-                    <a href="/assignment/product/<?php echo $p['slug']; ?>" class="btn-add">
-                        Thêm vào giỏ hàng
-                    </a>
+                    <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+                <div class="sort-options">
+                    <select id="sortPrice" onchange="sortProducts()">
+                        <option value="default">Sắp xếp theo</option>
+                        <option value="low">Giá thấp đến cao</option>
+                        <option value="high">Giá cao đến thấp</option>
+                    </select>
                 </div>
             </div>
-            <?php endforeach; ?>
         </div>
-    </main>
 
-    <script>
-    const slides = document.querySelectorAll('.slide');
-    const prevBtn = document.querySelector('.prev');
-    const nextBtn = document.querySelector('.next');
+        <!-- MAIN PRODUCT GRID -->
+        <main class="container products-section" id="products">
+            <div class="p-grid" id="productGrid">
+                <?php if (!empty($products)): ?>
+                <?php foreach($products as $p): 
+                    $cat_slug = parseCategorySlug($p['category_name']);
+                    // Tạo ảnh mẫu động cho danh sách sản phẩm
+                    $placeholder_img = "https://placehold.co/300x300/f5f5f7/1d1d1f?text=" . urlencode($p['name']);
+                    
+                    // Tính số sao hiển thị từ rating_avg thực tế
+                    $rating_avg = (float)$p['rating_avg'];
+                    $stars = ($rating_avg > 0) ? round($rating_avg) : 5;
+                ?>
+                <div class="p-card" data-cat="<?php echo $cat_slug; ?>" data-price="<?php echo $p['price']; ?>"
+                    data-name="<?php echo strtolower($p['name']); ?>">
+                    <?php if ((int)$p['discount'] > 0): ?>
+                    <span class="p-badge">-<?php echo (int)$p['discount']; ?>%</span>
+                    <?php endif; ?>
 
-    let index = 0;
+                    <img src="<?php echo $placeholder_img; ?>" alt="<?php echo htmlspecialchars($p['name']); ?>"
+                        class="p-img">
 
-    function showSlide(i) {
-        slides.forEach(s => s.classList.remove('active'));
-        slides[i].classList.add('active');
-    }
+                    <div class="p-info">
+                        <div style="color:#ffcc00; font-size:0.7rem; margin-bottom:5px;">
+                            <?php echo str_repeat('<i class="fas fa-star"></i>', $stars); ?>
+                        </div>
+                        <h3 class="p-name"><?php echo htmlspecialchars($p['name']); ?></h3>
+                        <div class="p-price-row">
+                            <span class="p-new"><?php echo formatVND($p['price']); ?></span>
+                            <span class="p-old"><?php echo formatVND($p['old_price']); ?></span>
+                        </div>
 
-    nextBtn.onclick = () => {
-        index = (index + 1) % slides.length;
-        showSlide(index);
-    };
+                        <div class="p-stats-wrap">
+                            <span><i class="far fa-eye"></i> <?php echo number_format($p['view_count']); ?> lượt
+                                xem</span>
+                            <span style="color: var(--primary); font-weight: 700;">Hot</span>
+                        </div>
 
-    prevBtn.onclick = () => {
-        index = (index - 1 + slides.length) % slides.length;
-        showSlide(index);
-    };
-    </script>
-    <script>
-    // 1. Logic Slider
-    let current = 0;
-    const slides = document.querySelectorAll('.slide');
-    setInterval(() => {
-        slides[current].classList.remove('active');
-        current = (current + 1) % slides.length;
-        slides[current].classList.add('active');
-    }, 5000);
+                        <a href="/product/<?php echo urlencode($p['slug']); ?>" class="btn-add">
+                            Chi tiết sản phẩm
+                        </a>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+                <?php else: ?>
+                <p style="text-align: center; grid-column: 1/-1; padding: 40px 0; color: #666;">Không tìm thấy sản phẩm
+                    nào.
+                </p>
+                <?php endif; ?>
 
-    // 2. Logic Lọc Category
-    function filterCat(cat, el) {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        el.classList.add('active');
+            </div>
+        </main>
+        <script>
+        // 1. Logic Slider điều khiển bằng tay & Tự động chạy tuần hoàn
+        const slides = document.querySelectorAll('.slide');
+        const prevBtn = document.querySelector('.prev');
+        const nextBtn = document.querySelector('.next');
+        let sliderIndex = 0;
 
-        const cards = document.querySelectorAll('.p-card');
-        cards.forEach(card => {
-            if (cat === 'all' || card.dataset.cat === cat) {
-                card.style.display = 'flex';
-            } else {
-                card.style.display = 'none';
+        function showSlide(i) {
+            if (slides.length === 0) return;
+            slides.forEach(s => s.classList.remove('active'));
+            slides[i].classList.add('active');
+        }
+
+        if (slides.length > 0) {
+            if (nextBtn) {
+                nextBtn.onclick = () => {
+                    sliderIndex = (sliderIndex + 1) % slides.length;
+                    showSlide(sliderIndex);
+                };
             }
-        });
-    }
 
-    // 3. Logic Tìm kiếm
-    document.getElementById('searchInput').addEventListener('input', function(e) {
-        const val = e.target.value.toLowerCase();
-        const cards = document.querySelectorAll('.p-card');
-        cards.forEach(card => {
-            if (card.dataset.name.includes(val)) {
-                card.style.display = 'flex';
-            } else {
-                card.style.display = 'none';
+            if (prevBtn) {
+                prevBtn.onclick = () => {
+                    sliderIndex = (sliderIndex - 1 + slides.length) % slides.length;
+                    showSlide(sliderIndex);
+                };
             }
-        });
-    });
 
-    // 4. Logic Sắp xếp giá
-    function sortProducts() {
-        const grid = document.getElementById('productGrid');
-        const cards = Array.from(grid.getElementsByClassName('p-card'));
-        const val = document.getElementById('sortPrice').value;
+            // Tự động chuyển đổi slide sau 5 giây
+            setInterval(() => {
+                sliderIndex = (sliderIndex + 1) % slides.length;
+                showSlide(sliderIndex);
+            }, 5000);
+        }
 
-        if (val === 'default') return;
+        // 2. Logic Lọc theo danh mục sản phẩm (Category)
+        function filterCat(cat, el) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
 
-        cards.sort((a, b) => {
-            const priceA = parseInt(a.dataset.price);
-            const priceB = parseInt(b.dataset.price);
-            return val === 'low' ? priceA - priceB : priceB - priceA;
-        });
+            const cards = document.querySelectorAll('.p-card');
+            cards.forEach(card => {
+                if (cat === 'all' || card.dataset.cat === cat) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
 
-        grid.innerHTML = "";
-        cards.forEach(card => grid.appendChild(card));
-    }
-    </script>
+        // 3. Logic Tìm kiếm sản phẩm thời gian thực
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', function(e) {
+                const val = e.target.value.toLowerCase().trim();
+                const cards = document.querySelectorAll('.p-card');
+                cards.forEach(card => {
+                    if (card.dataset.name.includes(val)) {
+                        card.style.display = 'flex';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        }
+
+        // 4. Logic Sắp xếp theo mức giá
+        function sortProducts() {
+            const grid = document.getElementById('productGrid');
+            if (!grid) return;
+
+            const cards = Array.from(grid.getElementsByClassName('p-card'));
+            const val = document.getElementById('sortPrice').value;
+
+            if (val === 'default') return;
+
+            cards.sort((a, b) => {
+                const priceA = parseFloat(a.dataset.price);
+                const priceB = parseFloat(b.dataset.price);
+                return val === 'low' ? priceA - priceB : priceB - priceA;
+            });
+
+            grid.innerHTML = "";
+            cards.forEach(card => grid.appendChild(card));
+        }
+        </script>
 
 </body>
 

@@ -2,24 +2,22 @@
 namespace App\DTOs;
 
 class ProductSkuDTO {
-    public function __construct(
-        public readonly string $sku_code,
-        public readonly float $price,
-        public readonly ?float $old_price,
-        public readonly int $stock_qty,
-        public readonly bool $is_default = false
-    ) {}
 
-    /**
-     * Factory method: Tạo DTO từ mảng dữ liệu (ví dụ từ $_POST)
-     */
+    public string $sku_code;
+    public float $price;
+    public float $old_price;
+    public int $stock_qty;
+    public int $is_default;
+
     public static function fromArray(array $data): self {
-        return new self(
-            sku_code:  $data['sku_code'],
-            price:     (float)$data['price'],
-            old_price: isset($data['old_price']) ? (float)$data['old_price'] : null,
-            stock_qty: (int)$data['stock_qty'],
-            is_default: (bool)($data['is_default'] ?? false)
-        );
+        $sku = new self();
+
+        $sku->sku_code   = $data['sku_code'] ?? '';
+        $sku->price      = (float)($data['price'] ?? 0);
+        $sku->old_price  = (float)($data['old_price'] ?? 0);
+        $sku->stock_qty  = (int)($data['stock_qty'] ?? 0);
+        $sku->is_default = isset($data['is_default']) ? 1 : 0;
+
+        return $sku;
     }
 }

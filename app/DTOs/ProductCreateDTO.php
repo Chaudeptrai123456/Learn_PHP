@@ -2,32 +2,34 @@
 namespace App\DTOs;
 
 class ProductCreateDTO {
-    /**
-     * @param ProductSkuDTO[] $skus
-     */
-    public function __construct(
-        public readonly int $category_id,
-        public readonly int $brand_id,
-        public readonly string $name,
-        public readonly string $slug,
-        public readonly ?string $short_desc,
-        public readonly ?string $long_desc,
-        public readonly float $base_price,
-        public readonly array $skus
-    ) {}
+
+    public int $category_id;
+    public int $brand_id;
+    public string $name;
+    public string $slug;
+    public ?string $short_desc;
+    public ?string $long_desc;
+    public float $base_price = 0;
+
+    public array $skus = [];
 
     public static function fromRequest(array $request): self {
-        $skus = array_map(fn($item) => ProductSkuDTO::fromArray($item), $request['skus'] ?? []);
 
-        return new self(
-            category_id: (int)$request['category_id'],
-            brand_id:    (int)$request['brand_id'],
-            name:        $request['name'],
-            slug:        $request['slug'],
-            short_desc:  $request['short_description'] ?? null,
-            long_desc:   $request['long_description'] ?? null,
-            base_price:  (float)$request['base_price'],
-            skus:        $skus
-        );
+        $dto = new self();
+
+        $dto->category_id = (int)($request['category_id'] ?? 0);
+        $dto->brand_id    = (int)($request['brand_id'] ?? 0);
+        $dto->name        = $request['name'] ?? '';
+        $dto->slug        = $request['slug'] ?? '';
+        $dto->short_desc  = $request['short_desc'] ?? null;
+        $dto->long_desc   = $request['long_desc'] ?? null;
+        $dto->base_price = 0;
+        if (!empty($request['skus'])) {
+            foreach ($request['skus'] as $item) {
+                $dto->skus[] = ProductSkuDTO::fromArray($item);
+            }
+        }
+
+        return $dto;
     }
 }

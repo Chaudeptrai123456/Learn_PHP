@@ -15,7 +15,6 @@ class ProductItemDTO {
         public readonly int $sold_count,
         public readonly string $badge
     ) {}
-
     /**
      * Map từ Entity sang DTO
      */

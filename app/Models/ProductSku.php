@@ -11,7 +11,7 @@ class ProductSku {
     public int $sold_qty;
     public ?string $image_url;
     public bool $is_default;
-
+    
     public function __construct(array $data = []) {
         $this->id = $data['id'] ?? 0;
         $this->product_id = $data['product_id'] ?? 0;

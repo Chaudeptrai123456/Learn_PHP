@@ -5,9 +5,41 @@ abstract class Controller {
 
     protected static array $routes = [];
 
-    public static function get(string $uri, string $action): void {
+ public static function get(string $uri, string $action): void {
         self::$routes['GET'][$uri] = $action;
     }
+
+    // public static function dispatch() {
+    //     $method = $_SERVER['REQUEST_METHOD'];
+    //     $uri = $_SERVER['REQUEST_URI'];
+
+    //     $uri = strtok($uri, '?');
+
+    //     $uri = str_replace('/assignment', '', $uri);
+
+    //     foreach (self::$routes[$method] as $route => $action) {
+
+    //         $pattern = str_replace('(:any)', '([^/]+)', $route);
+
+    //         $pattern = "#^" . $pattern . "$#";
+
+    //         if (preg_match($pattern, $uri, $matches)) {
+
+    //             array_shift($matches); // bỏ full match
+
+    //             list($controller, $methodAction) = explode('@', $action);
+
+    //             $controller = "App\\Controllers\\" . $controller;
+
+    //             call_user_func_array([new $controller, $methodAction], $matches);
+
+    //             return;
+    //         }
+    //     }
+
+    //     http_response_code(404);
+    //     echo "404 Not Found";
+    // }
 
     public static function post(string $uri, string $action): void {
         self::$routes['POST'][$uri] = $action;
@@ -39,7 +71,6 @@ abstract class Controller {
                 return;
             }
         }
-
         http_response_code(404);
         header("Location: /assignment/404");
         exit;
@@ -65,4 +96,5 @@ abstract class Controller {
         echo json_encode($data);
         exit;
     }
+
 }
