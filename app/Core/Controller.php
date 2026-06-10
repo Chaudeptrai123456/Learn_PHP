@@ -76,15 +76,33 @@ abstract class Controller {
         exit;
     }
     protected function view(string $view, array $data = []): void {
-        $viewFile = __DIR__ . "/../../views/$view.php";
-        if (!file_exists($viewFile)) {
-            die("View không tồn tại");
+    $viewFile = __DIR__ . "/../../views/$view.php";
+
+    if (!file_exists($viewFile)) {
+        http_response_code(404);
+        die("View không tồn tại");
+    }
+
+    session_start();
+    extract($data);
+    if (str_starts_with($view, '/admin/')) {
+        if ($_SESSION['user']['role'] !== 'admin' || !isset($_SESSION['user'])) {
+            http_response_code(403);
+            header("Location: /assignment/401");
+            exit;
         }
-        extract($data);
+        require __DIR__ . "/../../views/admin/components/header.php";
+        require $viewFile;
+        exit;
+    } else {
         require __DIR__ . "/../../views/layouts/header.php";
         require $viewFile;
-        require __DIR__ . "/../../views/layouts/footer.php";
+        require __DIR__ . "/../../views/layouts/footer.php";        
     }
+    
+
+    
+}
 
     protected function redirect(string $url): void {
         header("Location: /" . ltrim($url, '/'));

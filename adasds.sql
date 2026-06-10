@@ -1,5 +1,10 @@
 CREATE DATABASE ecommerce;
 USE ecommerce;
+UPDATE users
+SET role = 'admin'
+WHERE email = 'phamchaugiatu123@gmail.com';
+
+
 SELECT * FROM orders;
 
 UPDATE users
@@ -30,20 +35,10 @@ SET
 ADD COLUMN address VARCHAR(500) NULL AFTER phone;
 SELECT * FROM vouchers;
 
-CREATE TABLE categories (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    parent_id INT DEFAULT NULL,
-    name VARCHAR(255) NOT NULL,
-    slug VARCHAR(255) NOT NULL UNIQUE,
-    status TINYINT(1) DEFAULT 1,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (parent_id) REFERENCES categories(id),
-    INDEX idx_category_slug (slug)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(255) NOT NULL UNIQUE,
+    phone VARCHAR(20) UNIQUE,
     name VARCHAR(255),
     avatar_url VARCHAR(500),
     password VARCHAR(255), -- NULL nếu login Google
@@ -56,6 +51,17 @@ CREATE TABLE users (
     INDEX idx_user_email (email),
     INDEX idx_provider (provider, provider_id)
 ) ENGINE=InnoDB;
+CREATE TABLE categories (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    parent_id INT DEFAULT NULL,
+    name VARCHAR(255) NOT NULL,
+    slug VARCHAR(255) NOT NULL UNIQUE,
+    status TINYINT(1) DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (parent_id) REFERENCES categories(id),
+    INDEX idx_category_slug (slug)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE brands (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,

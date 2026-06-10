@@ -35,7 +35,19 @@ public function checkLogin($username, $password) {
     return new User($data);
 }
 public function findByEmailOrPhone($email) {
-    $sql = "SELECT * FROM users 
+    $sql = "SELECT   id,
+                name,
+                email,
+                phone,
+                address,
+                avatar_url,
+                password,
+                provider,
+                provider_id,
+                role,
+                status,
+                created_at,
+                updated_at FROM users 
             WHERE email = :email
             LIMIT 1";
 
@@ -45,9 +57,7 @@ public function findByEmailOrPhone($email) {
     ]);
 
     $data = $stmt->fetch(PDO::FETCH_ASSOC);
-
     if (!$data) return null;
-
     return new User($data);
 }
     public function findByEmail($email) {

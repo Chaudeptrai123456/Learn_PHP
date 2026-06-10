@@ -217,7 +217,7 @@
 
          <!-- Nút hành động quay về -->
          <div class="error-actions">
-             <a href="/assignment/products" class="btn-error-primary">Về Trang chủ</a>
+             <a href="/assignment" class="btn-error-primary">Về Trang chủ</a>
              <a href="/assignment/hotro" class="btn-error-secondary">Trung tâm hỗ trợ</a>
          </div>
 

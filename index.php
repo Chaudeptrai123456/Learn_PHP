@@ -20,6 +20,11 @@ require_once __DIR__ . '/config/config.php';
 require_once __DIR__ . '/app/Models/Category.php';
 require_once __DIR__ . '/app/DTOs/OrderItem.php';
 require_once __DIR__ . '/app/Helper/router.helper.php';
+require_once __DIR__ . '/app/Repositories/OrderRepository.php';
+require_once __DIR__ . '/app/admin/AdminService.php';
+require_once __DIR__ . '/app/Controllers/AdminController.php';
+
+use App\Core\Services;
 use App\Core\Database;
 try {
     $db = Database::getInstance()->getConnection();
@@ -28,3 +33,5 @@ try {
 }
 use App\Core\Controller;
 Controller::resolve();
+
+// /assignment/public/uploads/avatar/1780629933_avatar.pn

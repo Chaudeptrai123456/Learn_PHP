@@ -7,7 +7,7 @@ use App\Repositories\CategoryRepository;
 class HomeController extends Controller {
     private ProductRepository $proRepo;
     private CategoryRepository $cateRepo;
-
+    
     public function __construct() {
         $this->proRepo = new ProductRepository();
         $this->cateRepo = new CategoryRepository();
@@ -24,6 +24,9 @@ class HomeController extends Controller {
             'tren_pro'=>$trend
         ]);
     }
+    public function notrole(){
+        return $this->view('/public/pages/401');
+    }
     public function lienhe(){
         return $this->view('public/pages/lienhe');
     }
@@ -35,6 +38,5 @@ class HomeController extends Controller {
     }
     public function notfound(){
         return $this->view('public/pages/404');
-        
     }
-    }
+}

@@ -1,6 +1,13 @@
 RewriteEngine On
-
+ 
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+ 
+RewriteRule ^avatar/(.*)$ uploads/avatar/$1 [L]
+ 
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^avatar/(.*)$ uploads/avatar/04.08-luffy-gear-five.jpg.png [L]
 
-RewriteRule ^(.*)$ index.php [QSA,L]
+# Route còn lại → index.php
+RewriteRule ^ index.php [QSA,L]

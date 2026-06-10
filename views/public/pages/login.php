@@ -1,4 +1,3 @@
-<!-- CSS riêng cho trang Đăng nhập kiểu Apple Premium -->
 <style>
 :root {
     --login-primary: #0071e3;
@@ -11,7 +10,6 @@
     --login-shadow: 0 12px 40px rgba(0, 0, 0, 0.03);
 }
 
-/* Đẩy trang xuống dưới Header và thiết lập căn giữa */
 .login-wrapper {
     margin-top: 70px;
     min-height: calc(100vh - 70px);
@@ -22,7 +20,6 @@
     padding: 40px 20px;
 }
 
-/* Khung đăng nhập chính */
 .login-card {
     width: 100%;
     max-width: 440px;
@@ -268,8 +265,6 @@
     <div class="login-card">
         <h2>Đăng nhập TechStore</h2>
         <p class="subtitle">Quản lý tài khoản của bạn để tiếp cận trải nghiệm dịch vụ tốt nhất.</p>
-
-        <!-- HIỂN THỊ BANNER THÔNG BÁO LỖI NỘI BỘ (Chỉ hiển thị khi có lỗi từ Session) -->
         <?php if (!empty($_SESSION['error'])): ?>
         <div class="error-banner animate-fade-in">
             <i class="fas fa-circle-exclamation"></i>
@@ -277,8 +272,6 @@
         </div>
         <?php unset($_SESSION['error']); ?>
         <?php endif; ?>
-
-        <!-- Form Đăng nhập chính (Đã căn lề trái chuẩn xác) -->
         <form action="/assignment/handleLogin" method="POST" class="login-form">
             <div class="login-group">
                 <label for="loginEmail">Email</label>
@@ -302,13 +295,10 @@
 
             <button type="submit" class="btn-login-submit">Tiếp tục</button>
         </form>
-
-        <!-- Đường phân cách -->
         <div class="login-divider">
             <span>Hoặc</span>
         </div>
 
-        <!-- Các hình thức đăng nhập khác -->
         <div class="social-login-group">
             <button class="btn-social">
                 <!-- Sử dụng đường dẫn ảnh SVG Google sạch, không bị lỗi kí tự -->

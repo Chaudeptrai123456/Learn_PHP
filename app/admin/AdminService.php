@@ -355,4 +355,166 @@ class AdminDashboardService {
             ':order_id' => $orderId
         ]);
     }
+      public function getFullDashboard() {
+        return [
+            'stats' => $this->getDashboardStats(),
+            'recent_orders' => $this->getRecentOrders(),
+            'top_products' => $this->getTopSellingProducts(),
+            'low_stock' => $this->getLowStockProducts(),
+            'revenue_chart' => $this->getRevenueByDate(),
+            'order_status' => $this->getOrderStatusStats(),
+            'payment_stats' => $this->getPaymentMethodStats(),
+            'top_customers' => $this->getTopCustomers(),
+        ];
+    }
+ 
+    public function getDashboardStats() {
+        $sql = "SELECT 
+                    COUNT(*) as total_orders,
+                    SUM(final_amount) as total_revenue,
+                    SUM(CASE WHEN status = 'delivered' THEN final_amount ELSE 0 END) as completed_revenue,
+                    SUM(CASE WHEN payment_status = 'paid' THEN final_amount ELSE 0 END) as paid_revenue,
+                    COUNT(DISTINCT user_id) as total_customers
+                FROM orders";
+
+        return $this->db->query($sql)->fetch(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Thống kê sản phẩm bán chạy nhất
+     */
+    public function getTopSellingProducts($limit = 10) {
+        $sql = "SELECT 
+                    p.id,
+                    p.name,
+                    p.slug,
+                    SUM(oi.quantity) as total_sold,
+                    SUM(oi.quantity * oi.price) as revenue
+                FROM order_items oi
+                JOIN products p ON oi.product_id = p.id
+                JOIN orders o ON oi.order_id = o.id
+                WHERE o.status = 'delivered'
+                GROUP BY p.id, p.name, p.slug
+                ORDER BY total_sold DESC
+                LIMIT :limit";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Thống kê doanh thu theo thời gian
+     */
+    public function getRevenueByDate($type = 'day') {
+        $format = $type === 'month' ? '%Y-%m' : '%Y-%m-%d';
+
+        $sql = "SELECT 
+                    DATE_FORMAT(created_at, :format) as period,
+                    SUM(final_amount) as revenue
+                FROM orders
+                WHERE status = 'delivered'
+                GROUP BY period
+                ORDER BY period ASC";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':format', $format, PDO::PARAM_STR);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Thống kê số lượng đơn hàng theo từng trạng thái
+     */
+    public function getOrderStatusStats() {
+        $sql = "SELECT 
+                    status,
+                    COUNT(*) as total
+                FROM orders
+                GROUP BY status";
+
+        return $this->db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Lấy danh sách các đơn hàng mới cập nhật gần đây
+     */
+    public function getRecentOrders($limit = 10) {
+        $sql = "SELECT 
+                    o.id,
+                    u.name,
+                    o.final_amount,
+                    o.status,
+                    o.created_at
+                FROM orders o
+                JOIN users u ON o.user_id = u.id
+                ORDER BY o.created_at DESC
+                LIMIT :limit";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Lấy danh sách sản phẩm có lượng tồn kho dưới ngưỡng tối thiểu
+     */
+    public function getLowStockProducts($threshold = 10) {
+        $sql = "SELECT 
+                    p.name,
+                    s.sku_code,
+                    s.stock_qty
+                FROM product_skus s
+                JOIN products p ON s.product_id = p.id
+                WHERE s.stock_qty <= :threshold
+                ORDER BY s.stock_qty ASC";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':threshold', $threshold, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Thống kê phương thức thanh toán được sử dụng
+     */
+    public function getPaymentMethodStats() {
+        $sql = "SELECT 
+                    payment_method,
+                    COUNT(*) as total,
+                    SUM(final_amount) as revenue
+                FROM orders
+                GROUP BY payment_method";
+
+        return $this->db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Thống kê những khách hàng tiềm năng chi tiêu nhiều nhất
+     */
+    public function getTopCustomers($limit = 5) {
+        $sql = "SELECT 
+                    u.name,
+                    u.email,
+                    SUM(o.final_amount) as total_spent
+                FROM users u
+                JOIN orders o ON u.id = o.user_id
+                WHERE o.status = 'delivered'
+                GROUP BY u.id, u.name, u.email
+                ORDER BY total_spent DESC
+                LIMIT :limit";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
 }

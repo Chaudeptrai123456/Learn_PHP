@@ -7,10 +7,6 @@ if (!isset($_SESSION['cart'])) {
     $_SESSION['cart'] = [];
 }
 
-if (!isset($_SESSION['user'])) {
-    header("Location: /assignment/login");
-    exit;
-}
 
 if (!function_exists('formatVND')) {
     function formatVND($number) {
@@ -51,87 +47,17 @@ if (!function_exists('getVoucherDescription')) {
     }
 }
 
-if (!isset($valid_vouchers)) {
-    $valid_vouchers = [
-        [
-            'id' => 2,
-            'code' => 'PROLAPTOP',
-            'discount_type' => 'percent',
-            'discount_value' => 5.00,
-            'min_order_value' => 20000000.00,
-            'max_discount_value' => 1500000.00,
-            'status' => 1
-        ],
-        [
-            'id' => 1,
-            'code' => 'TECHNEW',
-            'discount_type' => 'fixed',
-            'discount_value' => 200000.00,
-            'min_order_value' => 10000000.00,
-            'max_discount_value' => null,
-            'status' => 1
-        ]
-    ];
-}
+// Kiểm tra trạng thái đơn hàng thành công truyền từ Controller qua GET
+$orderSuccess = isset($_GET['success']) && $_GET['success'] === 'true' && isset($_SESSION['last_order']);
+$last_order = $_SESSION['last_order'] ?? [];
+
+$orderId = $last_order['id'] ?? '';
+$fullname = $last_order['fullname'] ?? '';
+$phone = $last_order['phone'] ?? '';
+$address = $last_order['address'] ?? '';
+$applied_voucher = $last_order['applied_voucher'] ?? '';
+
 $current_page = strtok($_SERVER["REQUEST_URI"], '?');
-
-if (isset($_GET['action'])) {
-    $action = $_GET['action'];
-    $sku_id = isset($_GET['sku_id']) ? (int)$_GET['sku_id'] : 0;
-
-    if ($sku_id > 0 && isset($_SESSION['cart'][$sku_id])) {
-        $item = $_SESSION['cart'][$sku_id];
-        
-        if ($action === 'increase') {
-            if (is_object($item)) {
-                $_SESSION['cart'][$sku_id]->quantity = (int)$_SESSION['cart'][$sku_id]->quantity + 1;
-            } else {
-                $_SESSION['cart'][$sku_id]['quantity'] += 1;
-            }
-        } elseif ($action === 'decrease') {
-            if (is_object($item)) {
-                $_SESSION['cart'][$sku_id]->quantity = (int)$_SESSION['cart'][$sku_id]->quantity - 1;
-                if ($_SESSION['cart'][$sku_id]->quantity <= 0) {
-                    unset($_SESSION['cart'][$sku_id]);
-                }
-            } else {
-                $_SESSION['cart'][$sku_id]['quantity'] -= 1;
-                if ($_SESSION['cart'][$sku_id]['quantity'] <= 0) {
-                    unset($_SESSION['cart'][$sku_id]);
-                }
-            }
-        } elseif ($action === 'remove') {
-            unset($_SESSION['cart'][$sku_id]);
-        }
-    }
-    header("Location: " . $current_page);
-    exit;
-}
-
-$orderSuccess = false;
-$orderId = '';
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'place_order') {
-    $fullname = trim($_POST['fullname'] ?? '');
-    $phone = trim($_POST['phone'] ?? '');
-    $address = trim($_POST['address'] ?? '');
-    $notes = trim($_POST['notes'] ?? '');
-    $applied_voucher = trim($_POST['applied_voucher'] ?? ''); 
-    
-    if (!empty($fullname) && !empty($phone) && !empty($address) && !empty($_SESSION['cart'])) {
-        $orderId = 'TS-' . strtoupper(bin2hex(random_bytes(4)));
-        $_SESSION['last_order'] = [
-            'id' => $orderId,
-            'fullname' => $fullname,
-            'phone' => $phone,
-            'address' => $address,
-            'applied_voucher' => $applied_voucher,
-            'items' => $_SESSION['cart']
-        ];
-        
-        unset($_SESSION['cart']);
-        $orderSuccess = true;
-    }
-}
 
 // Tính tổng giá trị giỏ hàng tạm tính
 $subtotal = 0;
@@ -420,6 +346,13 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
         box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.08);
     }
 
+    .form-input[readonly] {
+        background: #f1f1f3;
+        color: var(--text-sub);
+        border-color: var(--border);
+        cursor: not-allowed;
+    }
+
     /* --- COLUMN RIGHT: BILLING SUMMARY & VOUCHERS --- */
     .summary-sticky {
         position: sticky;
@@ -657,8 +590,6 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
 
 <body>
 
-
-
     <main class="container">
 
         <?php if ($orderSuccess): ?>
@@ -673,12 +604,13 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
                 style="font-size: 2.4rem; font-weight: 800; letter-spacing: -0.8px; margin-bottom: 12px; line-height: 1.1;">
                 Đặt hàng thành công!</h1>
             <p style="color: var(--text-sub); font-size: 1.02rem; margin-bottom: 32px; line-height: 1.5;">
-                Mã số đơn hàng của Châu là <strong style="color:var(--text-main);"><?php echo $orderId; ?></strong>.<br>
+                Mã số đơn hàng của Khách iu là <strong
+                    style="color:var(--text-main);"><?php echo $orderId; ?></strong>.<br>
                 Chúng mình đang xử lý đơn hàng và sẽ liên hệ sớm nhất qua số điện thoại nhận hàng.
             </p>
             <div class="receipt-card">
                 <h3 style="font-weight: 800; margin-bottom: 16px; font-size: 1.05rem; letter-spacing: -0.2px;">Thông tin
-                    nhận hàng của Châu:</h3>
+                    nhận hàng của Khách iu :</h3>
                 <p style="font-size: 0.92rem; margin-bottom: 8px; color: var(--text-sub);">
                     <strong style="color: var(--text-main); font-weight: 600; width: 140px; display: inline-block;">Họ
                         và tên:</strong>
@@ -704,15 +636,15 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
                 </p>
                 <?php endif; ?>
             </div>
-            <a href="categories.php" class="btn-primary-apple">Tiếp tục mua sắm</a>
+            <a href="/assignment/categories" class="btn-primary-apple">Tiếp tục mua sắm</a>
         </div>
 
         <?php elseif (!empty($_SESSION['cart'])): ?>
         <!-- ==========================================
             MÀN HÌNH CHI TIẾT GIỎ HÀNG & FORM ĐẶT HÀNG
             ========================================== -->
-        <form action="" method="POST" id="orderForm">
-            <input type="hidden" name="action" value="place_order">
+        <!-- Thay đổi action trỏ trực tiếp đến route xử lý của Controller -->
+        <form action="/assignment/order/place" method="POST" id="orderForm">
             <!-- Input ẩn lưu danh sách mã Voucher dạng chuỗi cách nhau bằng dấu phẩy -->
             <input type="hidden" id="voucherCodeInput" name="applied_voucher" value="">
 
@@ -720,13 +652,13 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
 
                 <!-- CỘT BÊN TRÁI: DANH SÁCH GIỎ HÀNG & THÔNG TIN SHIP -->
                 <div class="column-left">
-                    <h2 class="section-title">Giỏ hàng của Châu</h2>
+                    <h2 class="section-title">Giỏ hàng của Khách iu </h2>
 
                     <div class="cart-list">
                         <?php foreach ($_SESSION['cart'] as $sku_id => $item): 
-                            // Đọc dữ liệu an toàn tương thích hoàn toàn với cả DTO Object lẫn Array thường
-                            $itemName = getCartItemValue($item, 'product_name') ?: getCartItemValue($item, 'name');
-                            $itemImage = getCartItemValue($item, 'image_url') ?: getCartItemValue($item, 'image');
+                            // Đọc dữ liệu từ DTO Object
+                            $itemName = getCartItemValue($item, 'product_name');
+                            $itemImage = getCartItemValue($item, 'image_url');
                             $skuCode = getCartItemValue($item, 'sku_code');
                             $price = (float)getCartItemValue($item, 'price');
                             $quantity = (int)getCartItemValue($item, 'quantity');
@@ -764,12 +696,12 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
                         <?php endforeach; ?>
                     </div>
 
-                    <!-- Form Thông Tin Ship hàng (Đọc trực tiếp tuyệt đối không qua hàm bọc để tránh lỗi scope) -->
+                    <!-- Form Thông Tin Ship hàng (Dùng readonly để truyền được dữ liệu lên Controller) -->
                     <h2 class="section-title">Thông tin giao hàng</h2>
                     <div class="shipping-card">
                         <div class="form-row">
                             <div class="form-group">
-                                <label class="form-label">Họ và tên của Châu</label>
+                                <label class="form-label">Họ và tên của Khách iu </label>
                                 <?php 
                                     $displayName = '';
                                     if (isset($_SESSION['user'])) {
@@ -783,7 +715,7 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
                                 ?>
                                 <input type="text" name="fullname" class="form-input" required
                                     value="<?php echo htmlspecialchars($displayName); ?>"
-                                    placeholder="Lê Thị Quỳnh Châu" disabled>
+                                    placeholder="Họ và tên người nhận" readonly>
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Số điện thoại</label>
@@ -799,8 +731,8 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
                                     }
                                 ?>
                                 <input type="tel" name="phone" class="form-input" required
-                                    value="<?php echo htmlspecialchars($displayPhone); ?>" placeholder="0905XXXXXX"
-                                    disabled>
+                                    value="<?php echo htmlspecialchars($displayPhone); ?>"
+                                    placeholder="Số điện thoại người nhận" readonly>
                             </div>
                         </div>
                         <div class="form-group">
@@ -816,9 +748,9 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
                                     }
                                 }
                             ?>
-                            <input type="text" name="address" class="form-input" required disabled
+                            <input type="text" name="address" class="form-input" required readonly
                                 value="<?php echo htmlspecialchars($displayAddress); ?>"
-                                placeholder="Số nhà, Tên đường, Quận/Huyện, Tỉnh/TP">
+                                placeholder="Địa chỉ nhận hàng">
                         </div>
                         <div class="form-group" style="margin-bottom: 0;">
                             <label class="form-label">Ghi chú giao hàng (Tùy chọn)</label>
@@ -835,25 +767,26 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
 
                         <div class="billing-card">
 
-                            <!-- Khu vực Voucher (Kế thừa tính năng dồn đa Voucher không load trang) -->
+                            <!-- Khu vực Voucher -->
                             <div class="voucher-section">
                                 <span class="form-label"><i class="fas fa-tags"></i> Voucher khuyến mãi</span>
                                 <div class="voucher-input-group">
-                                    <input type="text" id="voucherTextInput" placeholder="Nhập mã giảm giá..."
+                                    <input type="text" id="voucherTextInput" placeholder="Mã giảm giá..."
                                         class="form-input" style="text-transform:uppercase;" disabled hidden>
                                     <button type="button" onclick="applyVoucherByText()" class="btn-apply">Áp
                                         dụng</button>
                                 </div>
                                 <!-- Danh sách các Voucher đổ động từ Database -->
                                 <div class="voucher-badges">
+                                    <?php if (!empty($valid_vouchers)): ?>
                                     <?php foreach ($valid_vouchers as $v): 
-                                        $code = getCartItemValue($v, 'code');
-                                        $type = getCartItemValue($v, 'discount_type');
-                                        $value = (float)getCartItemValue($v, 'discount_value');
-                                        $minVal = (float)getCartItemValue($v, 'min_order_value');
-                                        $maxVal = (float)getCartItemValue($v, 'max_discount_value');
-                                        $desc = getVoucherDescription($v);
-                                    ?>
+                                            $code = getCartItemValue($v, 'code');
+                                            $type = getCartItemValue($v, 'discount_type');
+                                            $value = (float)getCartItemValue($v, 'discount_value');
+                                            $minVal = (float)getCartItemValue($v, 'min_order_value');
+                                            $maxVal = (float)getCartItemValue($v, 'max_discount_value');
+                                            $desc = getVoucherDescription($v);
+                                        ?>
                                     <div class="voucher-pill" id="pill-<?php echo $code; ?>"
                                         data-code="<?php echo $code; ?>" data-type="<?php echo $type; ?>"
                                         data-value="<?php echo $value; ?>" data-min="<?php echo $minVal; ?>"
@@ -867,6 +800,7 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
                                             style="font-size: 1.15rem; color:#86868b; transition: var(--transition);"></i>
                                     </div>
                                     <?php endforeach; ?>
+                                    <?php endif; ?>
                                 </div>
                             </div>
 
@@ -907,18 +841,15 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
             ========================================== -->
         <div class="empty-cart-state animate-fade-in">
             <i class="fas fa-shopping-bag"></i>
-            <h2>Giỏ hàng của Châu trống</h2>
+            <h2>Giỏ hàng của Khách iu trống</h2>
             <p style="margin-top: 8px;">Hãy tiếp tục tìm kiếm những sản phẩm công nghệ đỉnh cao và thêm chúng vào giỏ
                 hàng nhé!</p>
-            <a href="categories.php" class="btn-primary-apple">Khám phá sản phẩm</a>
+            <a href="/assignment/categories" class="btn-primary-apple">Khám phá sản phẩm</a>
         </div>
         <?php endif; ?>
 
     </main>
 
-    <!-- ==========================================
-    3. JAVASCRIPT BILLING ENGINE (ĐA VOUCHER KHÔNG LOAD TRANG)
-    ========================================== -->
     <script>
     // Định dạng tiền VNĐ phục vụ JS
     function formatMoney(amount) {
@@ -946,7 +877,7 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
         } else {
             // KIỂM TRA ĐIỀU KIỆN ĐƠN HÀNG TỐI THIỂU
             if (subtotal < minOrderVal) {
-                alert('Đơn hàng của Châu chưa đủ điều kiện tối thiểu ' + formatMoney(minOrderVal) +
+                alert('Đơn hàng của Khách iu chưa đủ điều kiện tối thiểu ' + formatMoney(minOrderVal) +
                     ' để sử dụng mã này nhé!');
                 return;
             }

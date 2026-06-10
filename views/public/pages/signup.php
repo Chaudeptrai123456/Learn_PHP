@@ -95,6 +95,76 @@
     box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.08);
 }
 
+/* --- KHU VỰC TẢI ẢNH ĐẠI DIỆN --- */
+.avatar-upload-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 28px;
+}
+
+.avatar-preview-container {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 2px dashed #d2d2d7;
+    background-color: var(--reg-light-gray);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    overflow: hidden;
+    transition: var(--reg-transition);
+}
+
+.avatar-preview-container:hover {
+    border-color: var(--reg-primary);
+    background-color: #e8e8ed;
+}
+
+.avatar-preview-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: none;
+}
+
+.avatar-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: var(--reg-text-gray);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-align: center;
+    pointer-events: none;
+}
+
+.avatar-placeholder i {
+    font-size: 1.4rem;
+    margin-bottom: 6px;
+    color: var(--reg-text-gray);
+}
+
+.avatar-input-hidden {
+    display: none;
+}
+
+.avatar-upload-label {
+    margin-top: 10px;
+    font-size: 0.8rem;
+    color: var(--reg-primary);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.avatar-upload-label:hover {
+    text-decoration: underline;
+}
+
+/* -------------------------------- */
+
 /* KHUNG THÔNG BÁO LỖI (ERROR BANNER) SANG TRỌNG */
 .error-banner {
     background-color: rgba(255, 59, 48, 0.06);
@@ -209,7 +279,10 @@
         <?php endif; ?>
 
         <!-- Form đăng ký thông tin -->
-        <form action="/assignment/handleSignup" method="POST" class="register-form">
+        <!-- Đã thêm enctype="multipart/form-data" để gửi file ảnh -->
+        <form action="/assignment/handleSignup" method="POST" enctype="multipart/form-data" class="register-form">
+
+
             <div class="register-group">
                 <label for="regName">Họ và tên</label>
                 <input type="text" id="regName" name="fullName" class="register-control" placeholder="Nguyễn Văn A"
@@ -245,6 +318,19 @@
                 <input type="password" id="regConfirmPassword" name="confirmPassword" class="register-control"
                     placeholder="Nhập lại mật khẩu" required>
             </div>
+            <div class="avatar-upload-wrapper">
+                <div class="avatar-preview-container" onclick="triggerAvatarSelect()">
+                    <div class="avatar-placeholder" id="avatarPlaceholder">
+                        <i class="fas fa-camera"></i>
+                        <span>Chọn ảnh</span>
+                    </div>
+                    <img id="avatarPreview" class="avatar-preview-image" src="" alt="Avatar Preview">
+                </div>
+                <!-- Input chọn ảnh thực tế (được ẩn đi) -->
+                <input type="file" id="regAvatar" name="avatar" class="avatar-input-hidden" accept="image/*"
+                    onchange="previewSelectedAvatar(this)">
+                <span class="avatar-upload-label" onclick="triggerAvatarSelect()">Tải ảnh đại diện</span>
+            </div>
 
             <!-- Điều khoản bảo mật -->
             <label class="terms-agreement">
@@ -252,6 +338,7 @@
                 <span>Tôi đã đọc và đồng ý với các <a href="#">Điều khoản dịch vụ</a> cùng <a href="#">Chính sách bảo
                         mật</a> của TechStore.</span>
             </label>
+            <!-- Khu vực tải lên Ảnh đại diện -->
 
             <button type="submit" class="btn-register-submit">Tạo tài khoản</button>
         </form>
@@ -262,3 +349,32 @@
         </div>
     </div>
 </div>
+
+<script>
+function triggerAvatarSelect() {
+    document.getElementById('regAvatar').click();
+}
+
+function previewSelectedAvatar(input) {
+    const file = input.files[0];
+    if (file) {
+        // Kiểm tra định dạng file ảnh
+        if (!file.type.startsWith('image/')) {
+            alert('Vui lòng chọn một file ảnh hợp lệ.');
+            input.value = '';
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const previewImg = document.getElementById('avatarPreview');
+            const placeholder = document.getElementById('avatarPlaceholder');
+
+            previewImg.src = e.target.result;
+            previewImg.style.display = 'block';
+            placeholder.style.display = 'none';
+        }
+        reader.readAsDataURL(file);
+    }
+}
+</script>
